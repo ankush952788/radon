@@ -1,59 +1,77 @@
 const { count } = require("console")
-const BookModel= require("../models/bookModel")
+const bookModel= require("../models/bookModel")
+const authorModel= require("../models/authorModel")
+
 
 const createBook= async function (req, res) {
     let data= req.body
-
-    let savedData= await BookModel.create(data)
+    let savedData= await bookModel.create(data)
     res.send({msg: savedData})
 }
 
-const getBooksData= async function (req, res) {
-    let allBooks= await BookModel.find( {authorName : "HO" } )
-    console.log(allBooks)
-    if (allBooks.length > 0 )  res.send({msg: allBooks, condition: true})
-    else res.send({msg: "No books found" , condition: false})
+const createAuthor= async function (req, res) {
+    let data= req.body
+    let author_id=data.author_id
+    if(!author_id) return res.send({msg: "Author id is mandatory"})
+    let savedData= await authorModel.create(data)
+    res.send({msg: savedData})
+}
+
+const getBook = async function(req,res){
+    let authorData = await authorModel.find({authorName:"Chetan Bhagat"}).select("author_id")
+    let bookData = await bookModel.find({author_id:authorData[1].author_id}) 
+    res.send({msg: bookData})
 }
 
 
-const updateBooks= async function (req, res) {
-    let data = req.body // {sales: "1200"}
-    // let allBooks= await BookModel.updateMany( 
-    //     { author: "SK"} , //condition
-    //     { $set: data } //update in data
-    //  )
-    let allBooks= await BookModel.findOneAndUpdate( 
-        { authorName: "ABC"} , //condition
-        { $set: data }, //update in data
-        { new: true , upsert: true} ,// new: true - will give you back the updated document // Upsert: it finds and updates the document but if the doc is not found(i.e it does not exist) then it creates a new document i.e UPdate Or inSERT  
-     )
+ const findAndUpdate = async function(req,res){
+     let books = await bookModel.findOneAndUpdate(  {bookName: "2 states" } , {$set: {price : 100} }, { new: true});
+     let authorData= await authorModel.find({author_id:books.author_id}).select("authorName")
+     let price = books.price
+     res.send({msg: authorData,price})
+ }
+
+
+const booksCost = async function(req,res){
+    const bookData = await bookModel.find({price: {$gte: 50, $lte: 100}}).select({author_id:1, _id:0 })
+    const id = bookData.map(inp => inp.author_id)
+
+    let temp = []
+
+    for(let i=0;i<id.length;i++){
+        let x = id[i]
+        const author = await authorModel.find({ author_id:x}).select({authorName:1, _id:0})
+        temp.push(author) 
+    }
+    const author_name = temp.flat()
+    res.send({msg: author_name})
+}
+
+ const getBooksName = async function(req,res){
      
-     res.send( { msg: allBooks})
+    let data = req.params.author_id
+    let books = await bookModel.find({author_id:data})
+    let output = books.map(inp => inp.bookName)
+    res.send({msg: output})
 }
 
-const deleteBooks= async function (req, res) {
-    // let data = req.body 
-    let allBooks= await BookModel.updateMany( 
-        { authorName: "FI"} , //condition
-        { $set: {isDeleted: true} }, //update in data
-        { new: true } ,
-     )
-     
-     res.send( { msg: allBooks})
-}
+  const listAuthor = async function(req,res){
+          let ratingData = await bookModel.find({ rating: {$gt: 4} }).select({ author_id: 1, rating:1})
+          let output = ratingData.map(inp => inp.author_id)
+         console.log(output)
+          let ageData = await authorModel.find({ age:{$gt: 50}}).select({author_id:1, age:1, })
+         let op = ageData.map(inp => inp.author_id)
+          console.log(op)
 
-
-
-
-// CRUD OPERATIONS:
-// CREATE
-// READ
-// UPDATE
-// DELETE
-
-
-
-module.exports.createBook= createBook
-module.exports.getBooksData= getBooksData
-module.exports.updateBooks= updateBooks
-module.exports.deleteBooks= deleteBooks
+          const author_name = temp.flat()
+          res.send({msg : author_name})
+      }
+    
+    
+    module.exports.createBook = createBook
+    module.exports.createAuthor = createAuthor
+    module.exports.getBook = getBook
+    module.exports.findAndUpdate = findAndUpdate
+    module.exports.booksCost = booksCost
+    module.exports.getBooksName = getBooksName
+    module.exports.listAuthor = listAuthor
