@@ -18,7 +18,7 @@
 router.post('/getHomePage' , MiddlewareIfLoggedIn,  UserController.homePage)
  
 function MiddlewareIfLoggedIn( req, res, next) {
-    if loggedIn then call the next fucntion/handler which will give us the home page feeds
+    if loggedIn then call the next function/handler which will give us the home page feeds
     else res.send( " please login or register")
  }
 
@@ -37,6 +37,7 @@ function MiddlewareIfLoggedIn( req, res, next) {
 
 <!-- GLOBAL MW -->
 app.use( midGlobal)
+
 
 # body-parser functions:
 - getting the post data in req.body
@@ -58,7 +59,8 @@ after 30 mins..you try to access your profile page..ideally FB should ask you to
 
 <!-- WITH JWT -->
 you punch your userName and password ..FB will craete a unique secret token( unique to every user) and send it to the browser..Chrome will save this token in its storage
-next time I want to acess my friendList..chrome(frontend) will send this token ( already stored in chrome storage) to the API..this API will first call a Middleware which will verify if the token is correct and who does it belong to..if token is correct then we will send the friend list of the concerned person..else send not authorised
+next time I want to acess my friendList..chrome(frontend) will send this token ( already stored in chrome storage) to the API..this API will first call a Middleware which will verify if the token is correct and
+ who does it belong to..if token is correct then we will send the friend list of the concerned person..else send not authorised.
 
 next time when you request your profile page..token is checked ..if correct you get your profile page, else "not authorised"
 
